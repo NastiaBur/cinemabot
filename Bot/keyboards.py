@@ -5,6 +5,8 @@ from aiogram.types import (
     InlineKeyboardMarkup
 )
 
+# :)
+
 links_kb = InlineKeyboardMarkup(
     inline_keyboard=[
         [

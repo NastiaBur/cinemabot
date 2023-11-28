@@ -8,7 +8,7 @@ from kino import get_info
 from database_fun import *
 # import codecs
 
-bot = Bot("6987883476:AAEDMR0zI1MfeuiURulhNpFmD7Lq0ligW2Y")
+bot = Bot("Put token here :)")
 dp = Dispatcher()
 
 

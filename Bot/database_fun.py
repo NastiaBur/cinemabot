@@ -1,5 +1,5 @@
 import sqlite3
-
+#Last Christmas I gave you my heart ...
 def user_exists(name):
     conn = sqlite3.connect("db.db")
     cur = conn.cursor()
@@ -55,55 +55,3 @@ def get_movie(name):
     cur.close()
     conn.close()
     return film
-
-
-
-
-
-# conn = sqlite3.connect("db.db")
-
-# cur = conn.cursor()
-
-# cur.execute(''' CREATE TABLE IF NOT EXISTS users
-#             (user_name TEXT, movie_name TEXT)''')
-# conn.commit()
-# name_list = [
-#     ('a', 'aa'),
-#     ('b', 'bb'),
-#     ('c', 'cc')
-# ]
-# cur.executemany(''' 
-#                 INSERT INTO users (user_name, movie_name) VALUES (?, ?)
-#                 ''', name_list)
-
-# conn.commit()
-# sm = cur.execute("SELECT * FROM users")
-# for row in sm:
-#     row
-
-# newPrice = 'aaaa'
-# book_id = 'a'
-# cur.execute('''UPDATE users SET movie_name = ? WHERE user_name = ?''', (newPrice, book_id))
-
-# sm = cur.execute("SELECT * FROM users")
-# for row in sm:
-#     print(row)
-# sm = cur.fetchall("SELECT * FROM users WHERE user_name=?", "a")
-# for row in sm:
-#     print(row)
-
-# sm = cur.execute("SELECT * FROM users")
-# for row in sm:
-#     print(row)
-
-# cur.execute(''' 
-#                 INSERT INTO users (user_name, movie_name) VALUES (?, ?)
-#                 ''', ('a', 'aa'))
-# sm = cur.execute("SELECT * FROM users")
-# for row in sm:
-#     print(row)
-
-# conn.commit()
-
-# cur.close()
-# conn.close()

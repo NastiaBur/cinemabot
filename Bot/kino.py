@@ -4,6 +4,7 @@ from kinopoisk_unofficial.request.films.film_request import FilmRequest
 from kinopoisk_unofficial.request.films.search_by_keyword_request import SearchByKeywordRequest
 
 # для проверки возрастных ограничений
+# ЭТО ОЧЕНЬ КРУТАЯ ФУНКЦИЯ
 import re 
 
 class Film:
