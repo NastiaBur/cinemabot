@@ -8,7 +8,7 @@ from kino import get_info
 from database_fun import *
 # import codecs
 
-bot = Bot("Put token here :)")
+bot = Bot("6987883476:AAEDMR0zI1MfeuiURulhNpFmD7Lq0ligW2Y")
 dp = Dispatcher()
 
 
@@ -25,7 +25,7 @@ async def sm(message: Message):
     # s = f.readline()
     # print(s)
     
-    s = get_movie(str(message.from_user.first_name))
+    s = get_movie(str(message.from_user.username))
     film = get_info(s)
     await message.answer(f"Описание: {film.description}")
 
@@ -35,14 +35,19 @@ async def echo(message: Message):
     film = get_info(message.text)
     # f = codecs.open('last.txt', 'w', 'utf-8')
     # f.write(message.text)
-    user_name = str(message.from_user.first_name)
+    user_name = str(message.from_user.username)
     print(user_name)
-    if user_exists(user_name):
-        user_update(user_name, film.name)
+    
+    if film.name is not None:
+        if user_exists(user_name):
+            user_update(user_name, film.name)
+        else:
+            user_add(user_name, film.name)
+    if film.name is None:
+        await message.answer("Не найдено")
     else:
-        user_add(user_name, film.name)
-    ans = 'Название: {} \nГод создания: {} \nРейтинг: {} \nСтрана: {} \nВозраст: {}'.format(film.name, film.year, film.rating, ', '.join(film.country), film.age)
-    await message.answer(ans, reply_markup=keyboards.film_kb)
+        ans = 'Название: {} \nГод создания: {} \nРейтинг: {} \nСтрана: {} \nВозраст: {}'.format(film.name, film.year, film.rating, ', '.join(film.country), film.age)
+        await message.answer(ans, reply_markup=keyboards.film_kb)
     # await message.answer("Here you go: ", reply_markup=keyboards.links_kb)
 
 
