@@ -1,5 +1,6 @@
 import sqlite3
 #Last Christmas I gave you my heart ...
+# but the very next day you give it away
 def user_exists(name):
     conn = sqlite3.connect("db.db")
     cur = conn.cursor()
