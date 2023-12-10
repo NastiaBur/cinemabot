@@ -35,7 +35,7 @@ main_kb = ReplyKeyboardMarkup(
 film_kb = ReplyKeyboardMarkup(
     keyboard= [
         [
-            KeyboardButton(text='Режисера'), 
+            KeyboardButton(text='Режиссеры'), 
             KeyboardButton(text='Главные актеры')
         ], 
         [ 
