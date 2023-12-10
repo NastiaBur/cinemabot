@@ -40,7 +40,7 @@ film_kb = ReplyKeyboardMarkup(
         ], 
         [ 
             KeyboardButton(text='Описание'), 
-            KeyboardButton(text='Покажи еще что-то')
+            KeyboardButton(text='Количество сезонов')
         ]
     ], 
     resize_keyboard=True, # сделать кнопки маленькими
