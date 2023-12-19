@@ -3,112 +3,102 @@ import asyncio
 from aiogram import Bot, Dispatcher, F, types
 from aiogram.types import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from aiogram.types import (
-    ReplyKeyboardMarkup, 
-    KeyboardButton, 
-    InlineKeyboardButton, 
-    InlineKeyboardMarkup
-)
+from aiogram.filters import CommandStart, Filter
 
 import keyboards
 from kino import *
 from database_fun import *
 from victoria_secret import *
 
+
+class AddFillter(Filter):
+    def __init__(self):
+        self.descr = "Описание"
+        self.direct = "Режиссеры"
+        self.actors = "Главные актеры"
+        self.seasons = "Количество сезонов"
+    
+    async def __call__(self, message: Message) -> bool:
+        req = message.text
+        return (req == self.descr) or (req == self.direct) or (req == self.actors) or (req == self.seasons)
+
+
 # Создаём бота
 bot = Bot(TOKEN)
 dp = Dispatcher()
 
-# Функционал /start
-@dp.message(F.text == "/start")
+ # Функционал /start
+@dp.message(CommandStart())
 async def start(message: Message):
     print(message)
     await message.answer(f"Hello, {message.from_user.first_name}")
 
-
-# Функционал кнопки "Описание"
-@dp.message(F.text == "Описание")
+# Обработка сообщений с дополнительной информацией 
+@dp.message(AddFillter())
 async def sm(message: Message):
-    
-    s = get_movie(str(message.from_user.username))
-    film = get_info(s)
-    await message.answer(f"Описание: {film.description}")
-    await message.answer("Что-то ещё?", reply_markup=keyboards.film_kb)
+    request = message.text
+    db_film_name = get_movie(str(message.from_user.username))
+    film = Film(db_film_name)
 
-# Функционал кнопки "Режиссеры"
-@dp.message(F.text == "Режиссеры")
-async def sm(message: Message):
-    s = get_movie(str(message.from_user.username))
-    film = get_info(s)
-    print(" ".join(film.directors))
-    await message.answer("Режиссеры: {}".format(", ".join(film.directors)))
-    await message.answer("Что-то ещё?", reply_markup=keyboards.film_kb)
-
-# Функционал кнопки "Главные актеры"
-@dp.message(F.text == "Главные актеры")
-async def sm(message: Message):
-    s = get_movie(str(message.from_user.username))
-    film = get_info(s)
-    print(" ".join(film.directors))
-    await message.answer("Главные актеры: {}".format(", ".join(film.actors)))
-    await message.answer("Что-то ещё?", reply_markup=keyboards.film_kb)
-
-# Функционал кнопки "Количество сезонов"
-@dp.message(F.text == "Количество сезонов")
-async def sm(message: Message):
-    s = get_movie(str(message.from_user.username))
-    film = get_info(s)
-    print(" ".join(film.directors))
-    print(type(film.seasons))
-    print(film.seasons)
-    if film.seasons != None:
-        await message.answer("Количество сезонов: {}".format(film.seasons))
+    if request == "Описание":
+        ans = f"Описание: {film.get_description()}"
+    elif request == "Режиссеры":
+        directors = ", ".join(film.get_directors())
+        ans = f"Режиссеры: {directors}"
+    elif request == "Главные актеры":
+        main_actors = ", ".join(film.get_actors())
+        ans = f"Главные актеры: {main_actors}"
     else:
-        await message.answer('Скорее всего это фильм или информация не была найдена')
+        if film.get_seasons() != None:
+            ans = f"Количество сезонов: {film.get_seasons()}"
+        else:
+            ans = 'Скорее всего это фильм или информация не была найдена'  
+
+    await message.answer(ans)
     await message.answer("Что-то ещё?", reply_markup=keyboards.film_kb)
+
 
 
 # Функционал при вводе названия фильма
 @dp.message()
 async def echo(message: Message):
-    film = get_info(message.text)
+    film = Film(message.text)
     user_name = str(message.from_user.username)
-    
-    if film.name is not None:
+    film_name = film.get_name()
+
+    if film_name is not None:
         if user_exists(user_name):
-            user_update(user_name, film.name)
+            user_update(user_name, film_name)
         else:
-            user_add(user_name, film.name)
+            user_add(user_name, film_name)
 
 
-    if film.name is None:
+    youtube_link = film.youtube_parser()
+    if film_name is None:
         await message.answer("Не найдено")
     else:
-        rating, link = ivi_parser(film.name)
-        if link is None:
-            links = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(text="kinopoisk", url=str(film.site_url))
-                ]
-            ]   
-            )
-        else:
-            links = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(text="Ivi", url =str(link)),
-                    InlineKeyboardButton(text="kinopoisk", url=str(film.site_url))
-                ]
-            ]   
-            )
+        urlkb = InlineKeyboardBuilder()
+        
+        ivi_rating, ivi_link = film.get_ivi_info()
+        if ivi_link is not None:
+            urlkb.add(types.InlineKeyboardButton(text="ivi", url =str(ivi_link)))
+        
 
+        urlkb.add(types.InlineKeyboardButton(text="kinopoisk", url=str(film.get_kinopoisk_url())))
+        urlkb.add(types.InlineKeyboardButton(text= "youtube", url = str(youtube_link)))
+
+        zona_link = film.zona_parser()
+        if zona_link is not None:
+            urlkb.add(types.InlineKeyboardButton(text="zona", url =str(zona_link)))
+
+        anime_link = film.anime_parser()
+        if anime_link is not None:
+            urlkb.add(types.InlineKeyboardButton(text="anime", url =str(anime_link)))
             
         
-        ans = 'Название: {} \nГод создания: {} \nРейтинг: kino {} \ ivi {}\nСтрана: {} \nВозраст: {}'.format(film.name, 
-            film.year, film.rating, rating, ', '.join(film.country), film.age)
-        await bot.send_photo(chat_id=message.chat.id, photo=film.poster_url, caption=ans, reply_markup=links)
+        ans = 'Название: {} \nГод создания: {} \nРейтинг: kino {} \ ivi {}\nСтрана: {} \nВозраст: {}'.format(film_name, 
+            film.get_year(), film.get_rating(), ivi_rating, ', '.join(film.get_country()), film.get_age())
+        await bot.send_photo(chat_id=message.chat.id, photo=film.get_poster_url(), caption=ans, reply_markup=urlkb.as_markup())
         await message.answer("Что-то ещё?", reply_markup=keyboards.film_kb)
     
 
