@@ -66,10 +66,6 @@ async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
     file = types.InputMediaPhoto(media=data['top'][page]['img'], caption=data['top'][page]['name'])
     await call.message.edit_media(media = file, reply_markup=paginator(page))
 
-@dp.message(F.text == "💋")
-async def chmok(message: Message):
-    await message.answer("I am gay")
-
 
 @dp.message(F.text == "/omg")
 async def top(message: Message):
@@ -115,6 +111,10 @@ async def top_movies(message: Message):
     await message.answer_media_group(
         media=album_builder.build()
     )
+
+@dp.message(F.text == "😡")
+async def top(message: Message):
+    await message.answer("Вы у меня самые лучшие!")
 
 
         
