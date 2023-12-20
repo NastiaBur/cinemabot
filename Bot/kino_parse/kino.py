@@ -28,12 +28,17 @@ class Film:
         self.api_client = KinopoiskApiClient(KINOPOISK_API)
         request = SearchByKeywordRequest(name)
         response = self.api_client.films.send_search_by_keyword_request(request)
-        self.request_film_id = response.films[0].film_id
-        id = FilmRequest(self.request_film_id)
-        self.film_response = self.api_client.films.send_film_request(id)
+        try:
+            self.request_film_id = response.films[0].film_id 
+            id = FilmRequest(self.request_film_id)
+            self.film_response = self.api_client.films.send_film_request(id)
+        except:
+            self.film_response = None
     
     
     def get_name(self):
+        if self.film_response is None:
+            return None
         return self.film_response.film.name_ru
 
     def get_type(self):

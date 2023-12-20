@@ -66,6 +66,11 @@ async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
     file = types.InputMediaPhoto(media=data['top'][page]['img'], caption=data['top'][page]['name'])
     await call.message.edit_media(media = file, reply_markup=paginator(page))
 
+@dp.message(F.text == "💋")
+async def chmok(message: Message):
+    await message.answer("I am gay")
+
+
 @dp.message(F.text == "/omg")
 async def top(message: Message):
     file = data['top'][0]['img']
