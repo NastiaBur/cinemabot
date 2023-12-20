@@ -94,7 +94,11 @@ class Film:
         return self.film_response.film.short_description
 
     def get_age(self):
-        return int(re.findall(r'\d+', self.film_response.film.rating_age_limits)[0])
+        try:
+            age = int(re.findall(r'\d+', self.film_response.film.rating_age_limits)[0])
+        except:
+            age = "I think you can watch"
+        return age
 
     def get_kinopoisk_url(self):
         return self.film_response.film.web_url

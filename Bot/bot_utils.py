@@ -1,18 +1,25 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher, types
-from aiogram.types import Message
+from aiogram import Bot, Dispatcher, types, F
+from aiogram.types import Message, CallbackQuery, InputMedia
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters import CommandStart
+from aiogram.utils.media_group import MediaGroupBuilder
+
+import json 
 
 from kino_parse.kino import Film
 from kino_parse.database_fun import *
 from victoria_secret import TOKEN
 
-from bot_items import AddFillter, film_kb
+from bot_items import AddFillter, film_kb, Pagination, paginator
 
 bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher()
+
+json_file = 'Bot/movies.json'
+with open(json_file, encoding='utf-8') as json_data:
+        data = json.load(json_data)
 
  # Функционал /start
 @dp.message(CommandStart())
@@ -45,7 +52,62 @@ async def sm(message: Message):
     await message.answer("Что-то ещё?", reply_markup=film_kb)
 
 
+@dp.callback_query(Pagination.filter(F.action.in_(["prev", "next"])))
+async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
+    page_num = int(callback_data.page)
+    page = (page_num + len(data['top']) - 1) % len(data['top'])
 
+    if callback_data.action == "next":
+        page = (page_num + 1) % len(data['top'])
+
+    file = types.InputMediaPhoto(media=data['top'][page]['img'], caption=data['top'][page]['name'])
+    await call.message.edit_media(media = file, reply_markup=paginator(page))
+
+@dp.message(F.text == "/omg")
+async def top(message: Message):
+    file = data['top'][0]['img']
+    # await message.answer(data['top'][0]['name'], reply_markup=paginator())
+    
+    await bot.send_photo(
+        message.chat.id,
+        photo=file,
+        reply_markup=paginator(),
+        caption=data['top'][0]['name'],
+    )
+
+@dp.message(F.text == "/Last")
+async def top_movies(message: Message):
+
+    json_file = 'Bot/movies.json'
+
+    with open(json_file, encoding="utf-8") as json_data:
+        data = json.load(json_data)
+    
+    album_builder = MediaGroupBuilder(
+        caption="Топ фильмов: {} \n {} \n {}".format(data['top'][0]['name'], data['top'][1]['name'], data['top'][2]['name'])
+    )
+    album_builder.add(
+        type = "photo",
+        media=data['top'][0]['img']
+
+    )
+    album_builder.add(
+        type = "photo",
+        media=data['top'][1]['img']
+
+    )
+    album_builder.add(
+        type = "photo",
+        media=data['top'][2]['img']
+
+    )
+
+    await message.answer_media_group(
+        media=album_builder.build()
+    )
+
+
+        
 # Функционал при вводе названия фильма
 @dp.message()
 async def echo(message: Message):
@@ -60,10 +122,10 @@ async def echo(message: Message):
             user_add(user_name, film_name)
 
 
-    youtube_link = film.youtube_parser()
     if film_name is None:
         await message.answer("Не найдено :(")
     else:
+        youtube_link = film.youtube_parser()
         urlkb = InlineKeyboardBuilder()
         
         ivi_rating, ivi_link = film.get_ivi_info()
