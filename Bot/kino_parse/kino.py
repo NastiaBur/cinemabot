@@ -150,17 +150,21 @@ class Film:
         return href
 
     def anime_parser(self):
-        url = "https://animego.org/search/all?q=" + quote(self.get_name()) + '/'
-        page = requests.get(url)
-        status = page.status_code
-        if status != 200:
-            return None
-        soup = BeautifulSoup(page.text, "lxml")
-        try:
-            href = soup.find('main').find('a', class_="d-block")['href']
-        except:
-            href = None
-        return href
+        genres = self.get_genre()
+
+        if genres.count('аниме') > 0:
+            url = "https://animego.org/search/all?q=" + quote(self.get_name()) + '/'
+            page = requests.get(url)
+            status = page.status_code
+            if status != 200:
+                return None
+            soup = BeautifulSoup(page.text, "lxml")
+            try:
+                href = soup.find('main').find('a', class_="d-block")['href']
+            except:
+                href = None
+            return href
+        return None
     
     def zona_parser(self):
         url = 'https://w140.zona.plus/search/' + quote(self.get_name())

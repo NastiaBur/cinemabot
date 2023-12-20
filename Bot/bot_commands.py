@@ -10,6 +10,10 @@ async def set_commands(bot: Bot):
         BotCommand(
             command='omg', 
             description='Подборка новогодних фильмов'
+        ),
+        BotCommand(
+            command ='last',
+            description='Подборка 2'
         )
     ]
 

@@ -1,7 +1,7 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher, types, F
-from aiogram.types import Message, CallbackQuery, InputMedia
+from aiogram.types import Message, CallbackQuery, InputMedia, ReplyKeyboardRemove
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters import CommandStart
 from aiogram.utils.media_group import MediaGroupBuilder
@@ -70,6 +70,7 @@ async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
 async def top(message: Message):
     file = data['top'][0]['img']
 
+    await message.answer("Happy New Year, honey :)", reply_markup=ReplyKeyboardRemove())
     
     await bot.send_photo(
         message.chat.id,
@@ -78,8 +79,9 @@ async def top(message: Message):
         caption=data['top'][0]['name'],
     )
 
+
 # Подборка фильмов сразу одним сообщением
-@dp.message(F.text == "/Last")
+@dp.message(F.text == "/last")
 async def top_movies(message: Message):
 
     json_file = 'Bot/movies.json'
@@ -103,7 +105,8 @@ async def top_movies(message: Message):
             media=e['img']
 
         )
-
+    await message.answer("Happy New Year, honey :)", reply_markup=ReplyKeyboardRemove())
+    
     await message.answer_media_group(
         media=album_builder.build()
     )
