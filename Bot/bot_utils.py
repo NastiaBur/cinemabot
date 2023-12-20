@@ -13,6 +13,8 @@ from kino_parse.database_fun import *
 from victoria_secret import TOKEN
 
 from bot_items import AddFillter, film_kb, Pagination, paginator
+from bot_commands import set_commands
+
 
 bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher()
@@ -24,7 +26,7 @@ with open(json_file, encoding='utf-8') as json_data:
  # Функционал /start
 @dp.message(CommandStart())
 async def start(message: Message):
-    print(message)
+    await set_commands(bot)
     await message.answer(f"Привет, <b>{message.from_user.first_name}</b>! \nНапиши мне название фильма, который надо найти.")
 
 # Обработка сообщений с дополнительной информацией 
@@ -52,6 +54,7 @@ async def sm(message: Message):
     await message.answer("Что-то ещё?", reply_markup=film_kb)
 
 
+# Подборка новогодних фильмов через пагинацию
 @dp.callback_query(Pagination.filter(F.action.in_(["prev", "next"])))
 async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
     page_num = int(callback_data.page)
@@ -66,7 +69,7 @@ async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
 @dp.message(F.text == "/omg")
 async def top(message: Message):
     file = data['top'][0]['img']
-    # await message.answer(data['top'][0]['name'], reply_markup=paginator())
+
     
     await bot.send_photo(
         message.chat.id,
@@ -75,6 +78,7 @@ async def top(message: Message):
         caption=data['top'][0]['name'],
     )
 
+# Подборка фильмов сразу одним сообщением
 @dp.message(F.text == "/Last")
 async def top_movies(message: Message):
 
@@ -82,25 +86,23 @@ async def top_movies(message: Message):
 
     with open(json_file, encoding="utf-8") as json_data:
         data = json.load(json_data)
+
+        caption = "<b>Название:</b>"
+
+    for i in range(len(data['top'])):
+        caption += "\n" + str(i + 1) + ". " + data['top'][i]['name']
+
     
     album_builder = MediaGroupBuilder(
-        caption="Топ фильмов: {} \n {} \n {}".format(data['top'][0]['name'], data['top'][1]['name'], data['top'][2]['name'])
+        caption=caption
     )
-    album_builder.add(
-        type = "photo",
-        media=data['top'][0]['img']
 
-    )
-    album_builder.add(
-        type = "photo",
-        media=data['top'][1]['img']
+    for e in data['top']:
+        album_builder.add(
+            type = "photo",
+            media=e['img']
 
-    )
-    album_builder.add(
-        type = "photo",
-        media=data['top'][2]['img']
-
-    )
+        )
 
     await message.answer_media_group(
         media=album_builder.build()

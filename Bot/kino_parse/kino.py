@@ -128,6 +128,7 @@ class Film:
                 rating = i['ivi_rating_10']
                 link = i['share_link']
                 break
+            
         return rating, link
     
     def youtube_parser(self):
