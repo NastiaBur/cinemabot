@@ -31,7 +31,7 @@ async def start(message: Message):
 
 # Обработка сообщений с дополнительной информацией 
 @dp.message(AddFillter())
-async def sm(message: Message):
+async def additional_info(message: Message):
     request = message.text
     db_film_name = get_movie(str(message.from_user.username))
     film = Film(db_film_name)
