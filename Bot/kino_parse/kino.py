@@ -29,9 +29,7 @@ import re
 from urllib.request import urlopen
 import json
 from urllib.parse import quote
-#from victoria_secret import KINOPOISK_API
-
-KINOPOISK_API = "14df4088-0c1e-475f-8295-2330a36a15ab"
+from victoria_secret import KINOPOISK_API
 
 class Film:
     def __init__(self, name : str):
