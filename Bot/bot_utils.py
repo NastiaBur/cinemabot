@@ -5,6 +5,7 @@ from aiogram.types import Message, CallbackQuery, InputMedia, ReplyKeyboardRemov
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.filters import CommandStart
 from aiogram.utils.media_group import MediaGroupBuilder
+import random
 
 import json 
 
@@ -116,7 +117,21 @@ async def top_movies(message: Message):
 async def top(message: Message):
     await message.answer("Вы у меня самые лучшие!")
 
+# Посоветовать фильм из подборки топ-250 лучших
+@dp.message(F.text == "/random")
+async def random_from_top(message: Message):
 
+    json_file = 'Bot/top_250_movies.json'
+
+    film_index = random.randint(0, 249)
+
+    with open(json_file, encoding="utf-8") as json_data:
+        data = json.load(json_data)
+
+    random_film_name = data['top_250_films'][film_index]
+    
+    await message.answer("Вот случайный фильм:", reply_markup=ReplyKeyboardRemove())
+    echo(random_film_name)
         
 # Функционал при вводе названия фильма
 @dp.message()

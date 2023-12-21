@@ -4,6 +4,11 @@ from kinopoisk_unofficial.request.films.search_by_keyword_request import SearchB
 from kinopoisk_unofficial.request.films.film_request import FilmRequest
 from kinopoisk_unofficial.request.films.seasons_request import SeasonsRequest
 from kinopoisk_unofficial.request.staff.staff_request import StaffRequest
+from kinopoisk_unofficial.request.films.film_top_request import FilmTopRequest
+from kinopoisk_unofficial.model.dictonary.top_type import TopType
+
+from kinopoisk_unofficial.kinopoisk_api_client import KinopoiskApiClient
+from kinopoisk_unofficial.request.films.related_film_request import RelatedFilmRequest
 
 from youtube_search import YoutubeSearch
 
@@ -18,7 +23,6 @@ from urllib.request import urlopen
 import json
 from urllib.parse import quote
 from victoria_secret import KINOPOISK_API
-
 
 
 
@@ -122,6 +126,16 @@ class Film:
                 pass
         return seasons_cnt
     
+
+    def get_related_films(self):
+        related_request = RelatedFilmRequest(self.request_film_id)
+        related_response = self.api_client.films.send_related_film_request(related_request)
+        films = []
+        for f in related_response.items:
+            films.append(f.name_ru)
+        return films
+    
+
     def get_ivi_info(self):
         url = "https://api.ivi.ru/mobileapi/search/v7/?query=" + quote(self.get_name()) + '&app_version=23801'
         response = urlopen(url)
@@ -201,5 +215,9 @@ def okko_parser(film):
   return url
 
 
-
-
+def get_top_films():
+    api_client = KinopoiskApiClient(KINOPOISK_API)
+    request = FilmTopRequest(TopType.TOP_100_POPULAR_FILMS)
+    #request.type = TopType.TOP_100_POPULAR_FILMS
+    response = api_client.films.send_film_top_request(request)
+    
