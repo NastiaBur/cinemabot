@@ -227,6 +227,7 @@ def get_top_films():
     response = api_client.films.send_film_top_request(request)
     
 def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None):
+    
     api_client = KinopoiskApiClient(KINOPOISK_API)
     filters_request = FilmSearchByFiltersRequest()
    
