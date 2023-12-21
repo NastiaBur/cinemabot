@@ -131,7 +131,8 @@ async def random_from_top(message: Message):
     random_film_name = data['top_250_films'][film_index]
     
     await message.answer("Вот случайный фильм:", reply_markup=ReplyKeyboardRemove())
-    echo(random_film_name)
+    object.__setattr__(message, "text", random_film_name)
+    await echo(message)
         
 # Функционал при вводе названия фильма
 @dp.message()
