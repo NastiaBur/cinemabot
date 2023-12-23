@@ -257,3 +257,12 @@ def get_10_films_by_name(name):
         if film_response:
             result.append((film_response.film.name_ru, film_response.film.year))
     return result
+
+
+def create_str_list(name):
+    other_films_by_request = get_10_films_by_name(name)
+    res = ''
+    for i in range(1, 6):
+        name_year = other_films_by_request[i]
+        res += name_year[0] + ', ' + str(name_year[1]) + '\n'
+    return res

@@ -10,6 +10,7 @@ import random
 import json 
 
 from kino_parse.kino import Film
+from kino_parse.kino import create_str_list
 from kino_parse.database_fun import *
 from victoria_secret import TOKEN
 
@@ -169,12 +170,16 @@ async def echo(message: Message):
         anime_link = film.anime_parser()
         if anime_link is not None:
             urlkb.add(types.InlineKeyboardButton(text="anime", url =str(anime_link)))
-            
+
+        other_films_by_request = create_str_list(message.text)
+        question = 'Возможно, вы искали какой-то из этих фильмов?\n\n' + other_films_by_request
         
         ans = '<b>Название:</b> {} \n<b>Год создания:</b> {} \n<b>Рейтинг:</b> kinopoisk {} \ ivi  {}\n<b>Страна:</b> {} \n<b>Возраст:</b> {}'.format(film_name, 
             film.get_year(), film.get_rating(), ivi_rating, ', '.join(film.get_country()), film.get_age())
         await bot.send_photo(chat_id=message.chat.id, photo=film.get_poster_url(), caption=ans, reply_markup=urlkb.as_markup())
+        await message.answer(question)
         await message.answer("Что-то ещё?", reply_markup=film_kb)
+
     
 
 
