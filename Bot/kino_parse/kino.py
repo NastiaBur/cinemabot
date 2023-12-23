@@ -240,3 +240,20 @@ def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None)
     for f in response.items:
         films.append(f.name_ru)
     return films
+
+
+def get_10_films_by_name(name):
+    api_client = KinopoiskApiClient(KINOPOISK_API)
+    request = SearchByKeywordRequest(name)
+    response = api_client.films.send_search_by_keyword_request(request)
+    result = []
+    for i in range(5):
+        request_film_id = response.films[i].film_id 
+        id = FilmRequest(request_film_id)
+        try:
+            film_response = api_client.films.send_film_request(id)
+        except:
+            film_response = None
+        if film_response:
+            result.append((film_response.film.name_ru, film_response.film.year))
+    return result
