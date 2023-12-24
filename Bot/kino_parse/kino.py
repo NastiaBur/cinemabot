@@ -3,23 +3,17 @@ from kinopoisk_unofficial.request.films.search_by_keyword_request import SearchB
 from kinopoisk_unofficial.request.films.film_request import FilmRequest
 from kinopoisk_unofficial.request.films.seasons_request import SeasonsRequest
 from kinopoisk_unofficial.request.staff.staff_request import StaffRequest
-from kinopoisk_unofficial.request.films.filters_request import FiltersRequest
-from kinopoisk_unofficial.model.filter_country import FilterCountry
-from kinopoisk_unofficial.model.filter_order import FilterOrder
-from kinopoisk_unofficial.model.filter_genre import FilterGenre
-from kinopoisk_unofficial.request.films.film_search_by_filters_request import FilmSearchByFiltersRequest
-
 from youtube_search import YoutubeSearch
 from bs4 import BeautifulSoup
 import requests
 from bs2json import BS2Json
-from Bot.logger import kino_logger
-
 import re
 from urllib.request import urlopen
 import json
 from urllib.parse import quote
 from Bot.victoria_secret import KINOPOISK_API
+from Bot.logger import kino_logger
+
 
 
 class Film:
@@ -175,7 +169,7 @@ class Film:
         # Okko, Wink
         url = 'https://kinopoiskapiunofficial.tech/api/v2.2/films/' + str(
             self.request_film_id) + '/external_sources?page=1'
-        payload = {'Content-Type': 'application/json', 'X-API-KEY': '0085a432-f5c0-4704-a3aa-d168b95547c8'}
+        payload = {'Content-Type': 'application/json', 'X-API-KEY': '4ab268be-1ff8-4bcd-bda8-85d7afb10819'}
         r = requests.get(url, headers=payload)
         status = r.status_code
         if status != 200:
@@ -271,41 +265,3 @@ class Film:
         return None
 
 
-def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None):
-
-    try:
-        api_client = KinopoiskApiClient("0085a432-f5c0-4704-a3aa-d168b95547c8")
-        request = FiltersRequest()
-        response = api_client.films.send_filters_request(request)
-        filters_request = FilmSearchByFiltersRequest()
-    except Exception as e:
-        kino_logger.error(f'In get_films_by_filters exception {e} in send_filters_request')
-        return []
-
-    if filter_genre is not None:
-        genres = response.genres
-        for genre in genres:
-            if genre.genre == filter_genre:
-                filters_request.add_genre(FilterGenre(genre.id, filter_genre))
-
-    if filter_country is not None:
-        countries = response.countries
-        for country in countries:
-            if country.country == filter_country:
-                filters_request.add_country(FilterCountry(country.id, filter_country))
-
-    if year_from is not None:
-        filters_request.year_from = year_from
-
-    request.order = FilterOrder.RATING
-
-    response = api_client.films.send_film_search_by_filters_request(filters_request)
-    # except Exception as e:
-    #     kino_logger.error(f'In send_film_search_by_filters_request exception {e} ')
-    #     return []
-    films = []
-    for f in response.items:
-        if f.name_ru is not None:
-            films.append(f.name_ru)
-
-    return films
