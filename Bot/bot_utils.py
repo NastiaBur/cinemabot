@@ -11,7 +11,7 @@ import json
 from kino_parse.kino import Film, get_films_by_filters
 from kino_parse.collections import get_collections
 from kino_parse.database_fun import *
-from kino_parse.fichi import create_str_list
+from kino_parse.fichi import Related_films
 from victoria_secret import TOKEN
 
 from bot_items import AddFillter, CollFilter, film_kb, Pagination, paginator
@@ -19,7 +19,7 @@ from bot_commands import set_commands
 from logger import bot_logger
 
 
-bot = Bot("6987883476:AAEDMR0zI1MfeuiURulhNpFmD7Lq0ligW2Y", parse_mode='HTML')
+bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher()
 
 
@@ -293,7 +293,7 @@ async def echo(message: Message):
 
         await bot.send_photo(chat_id=message.chat.id, photo=film.get_poster_url(), caption=ans, reply_markup=urlkb.as_markup())
         if not command_random:
-            other_films_by_request = create_str_list(message.text)
+            other_films_by_request = Related_films(message.text).get_films()
             question = 'Возможно, вы искали какой-то из этих фильмов?\n\n' + other_films_by_request
             await message.answer(question)
 

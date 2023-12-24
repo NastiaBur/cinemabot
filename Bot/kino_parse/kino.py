@@ -298,10 +298,11 @@ def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None)
         filters_request.year_from = year_from
 
     request.order = FilterOrder.RATING
-    try:
-        response = api_client.films.send_film_search_by_filters_request(filters_request)
-    except Exception as e:
-        kino_logger.error(f'In send_film_search_by_filters_request exception {e} ')
+
+    response = api_client.films.send_film_search_by_filters_request(filters_request)
+    # except Exception as e:
+    #     kino_logger.error(f'In send_film_search_by_filters_request exception {e} ')
+    #     return []
     films = []
     for f in response.items:
         if f.name_ru is not None:
