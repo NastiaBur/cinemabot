@@ -1,4 +1,3 @@
-
 from kinopoisk_unofficial.kinopoisk_api_client import KinopoiskApiClient
 from kinopoisk_unofficial.request.films.search_by_keyword_request import SearchByKeywordRequest
 from kinopoisk_unofficial.request.films.film_request import FilmRequest
@@ -10,22 +9,21 @@ from kinopoisk_unofficial.model.filter_order import FilterOrder
 from kinopoisk_unofficial.model.filter_genre import FilterGenre
 from kinopoisk_unofficial.request.films.film_search_by_filters_request import FilmSearchByFiltersRequest
 
-
 from youtube_search import YoutubeSearch
 from bs4 import BeautifulSoup
 import requests
 from bs2json import BS2Json
-from logger import kino_logger
+from Bot.logger import kino_logger
 
-import re 
+import re
 from urllib.request import urlopen
 import json
 from urllib.parse import quote
-from victoria_secret import KINOPOISK_API
+from Bot.victoria_secret import KINOPOISK_API
 
 
 class Film:
-    def __init__(self, name : str):
+    def __init__(self, name: str):
         self.name = name
         try:
             self.api_client = KinopoiskApiClient(KINOPOISK_API)
@@ -35,14 +33,13 @@ class Film:
             kino_logger.critical(f"Error connecting to the kinopoisk API {e}")
 
         try:
-            self.request_film_id = response.films[0].film_id 
+            self.request_film_id = response.films[0].film_id
             id = FilmRequest(self.request_film_id)
             self.film_response = self.api_client.films.send_film_request(id)
         except Exception as e:
             kino_logger.error(f'Film {name} was not found, exception: {e}')
             self.film_response = None
-    
-    
+
     def get_name(self):
         try:
             if self.film_response is None:
@@ -54,7 +51,8 @@ class Film:
 
     def get_type(self):
         try:
-            film_types = {"FILM" : "Фильм", "TV_SERIES" : "Сериал", "MINI_SERIES" : "Видео", "TV_SHOW" : "ТВ шоу", "VIDEO" : "Видео"}
+            film_types = {"FILM": "Фильм", "TV_SERIES": "Сериал", "MINI_SERIES": "Видео", "TV_SHOW": "ТВ шоу",
+                          "VIDEO": "Видео"}
             return film_types[self.film_response.film.type.name]
         except Exception as e:
             kino_logger.error(f'Film type for {self.name} was not found, exception: {e}')
@@ -142,7 +140,6 @@ class Film:
         except Exception as e:
             kino_logger.error(f'Film short_description for {self.name} was not found, exceptoin: {e}')
 
-
     def get_age(self):
         try:
             age = int(re.findall(r'\d+', self.film_response.film.rating_age_limits)[0])
@@ -163,7 +160,6 @@ class Film:
         except Exception as e:
             kino_logger.warning(f'Film is_series for {self.name} was not found, exceptoin: {e}')
 
-
     def get_seasons(self):
         seasons_cnt = None
         if self.is_series():
@@ -174,8 +170,6 @@ class Film:
             except Exception as e:
                 kino_logger.warning(f'Film seasons for {self.name} were not found , exception: {e}')
         return seasons_cnt
-
-
 
     def get_external_sources(self, source):
         # Okko, Wink
@@ -197,8 +191,7 @@ class Film:
             kino_logger.warning(f"Some troubles with {source} in kinipoisk, \n exception: {e}")
             return None
         return link
-    
-    
+
     def get_ivi_info(self):
         try:
             url = "https://api.ivi.ru/mobileapi/search/v7/?query=" + quote(self.get_name()) + '&app_version=23801'
@@ -220,12 +213,12 @@ class Film:
                 except:
                     kino_logger.warning(f'No ivi link for {self.get_name()}')
                 break
-            
+
         return rating, link
-    
+
     def youtube_parser(self):
         try:
-            res = YoutubeSearch(self.get_name() + ' trailer', max_results = 1).to_dict()
+            res = YoutubeSearch(self.get_name() + ' trailer', max_results=1).to_dict()
             return 'https://www.youtube.com' + res[0]['url_suffix']
         except Exception as e:
             kino_logger.warning(f'Some troubles with youtube for {self.get_name()}, exception:{e}')
@@ -248,7 +241,7 @@ class Film:
                 kino_logger.warning(f'No anime for {self.get_name()}')
                 return href
         return None
-    
+
     def zona_parser(self):
         url = 'https://w140.zona.plus/search/' + quote(self.get_name())
         response = requests.get(url)
@@ -256,7 +249,7 @@ class Film:
             kino_logger.error(f'Zona status is not 200')
             return None
         bs = BeautifulSoup(response.text, "lxml")
-        temp = bs.find('ul', {"class" : 'results'})
+        temp = bs.find('ul', {"class": 'results'})
         if temp:
             bs2json = BS2Json(temp)
             json_obj = bs2json.convert()
@@ -280,37 +273,38 @@ class Film:
 
 def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None):
 
-    api_client = KinopoiskApiClient("0085a432-f5c0-4704-a3aa-d168b95547c8")
-
-    request = FiltersRequest()
-    response = api_client.films.send_filters_request(request)
-    filters_request = FilmSearchByFiltersRequest()
+    try:
+        api_client = KinopoiskApiClient("0085a432-f5c0-4704-a3aa-d168b95547c8")
+        request = FiltersRequest()
+        response = api_client.films.send_filters_request(request)
+        filters_request = FilmSearchByFiltersRequest()
+    except Exception as e:
+        kino_logger.error(f'In get_films_by_filters exception {e} in send_filters_request')
+        return []
 
     if filter_genre is not None:
         genres = response.genres
-        genre_id = None
-        print(filter_genre)
         for genre in genres:
             if genre.genre == filter_genre:
-                print(genre.genre)
-                genre_id = genre.id
-                print(genre_id)
-                filters_request.add_genre(FilterGenre(genre_id, filter_genre))
+                filters_request.add_genre(FilterGenre(genre.id, filter_genre))
 
     if filter_country is not None:
         countries = response.countries
-        country_id = None
         for country in countries:
             if country.country == filter_country:
-                country_id = country.id
-                filters_request.add_country(FilterCountry(country_id, filter_country))
+                filters_request.add_country(FilterCountry(country.id, filter_country))
 
     if year_from is not None:
         filters_request.year_from = year_from
-    request.order = FilterOrder.RATING
 
-    response = api_client.films.send_film_search_by_filters_request(filters_request)
+    request.order = FilterOrder.RATING
+    try:
+        response = api_client.films.send_film_search_by_filters_request(filters_request)
+    except Exception as e:
+        kino_logger.error(f'In send_film_search_by_filters_request exception {e} ')
     films = []
     for f in response.items:
-        films.append(f.name_ru)
+        if f.name_ru is not None:
+            films.append(f.name_ru)
+
     return films
