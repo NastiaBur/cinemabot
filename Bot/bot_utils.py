@@ -20,7 +20,7 @@ from bot_commands import set_commands
 from logger import bot_logger
 
 
-bot = Bot('6987883476:AAEDMR0zI1MfeuiURulhNpFmD7Lq0ligW2Y', parse_mode='HTML')
+bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher()
 
 
@@ -40,6 +40,7 @@ async def start(message: Message):
     >> start(message)
     '''
     bot_logger.info(f'User {message.from_user.id} started the bot and updated collections')
+    user_add(str(message.from_user.username), "None")
     await set_commands(bot)
     await message.answer(f"Привет, <b>{message.from_user.first_name}</b>! \nНапиши мне название фильма, который надо найти.")
 
