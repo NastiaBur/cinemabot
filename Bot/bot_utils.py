@@ -2,24 +2,25 @@ import asyncio
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
-from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 from aiogram.filters import CommandStart
 import random
 
 import json 
 
-from kino_parse.kino import Film, get_films_by_filters
+from kino_parse.film_filters import get_films_by_filters
+from kino_parse.kino import Film
 from kino_parse.collections import get_collections
 from kino_parse.database_fun import *
 from kino_parse.fichi import Related_films
 from victoria_secret import TOKEN
 
-from bot_items import AddFillter, CollFilter, film_kb, Pagination, paginator
+from bot_items import AddFillter, CollFilter, film_kb, g_y_c, Pagination, paginator
 from bot_commands import set_commands
 from logger import bot_logger
 
 
-bot = Bot(TOKEN, parse_mode='HTML')
+bot = Bot('6987883476:AAEDMR0zI1MfeuiURulhNpFmD7Lq0ligW2Y', parse_mode='HTML')
 dp = Dispatcher()
 
 
@@ -166,13 +167,48 @@ async def top(message: Message):
     bot_logger.info("Received a special message and sent a secret response")
     await message.answer("Вы у меня самые лучшие!")
 
-@dp.message(F.text == "/choose_genre")
+@dp.message(F.text == '/choose')
+async def choose_category(message: Message):
+    await message.answer(text = "Выбери категорию для сотсавления подборки", reply_markup=g_y_c)
+
+@dp.message(F.text == "Я закончил выбор")
+async def choice_ended(message:Message):
+    user_name = str(message.from_user.username)
+    genre, year, country = get_others(user_name)
+    if genre == "None":
+        genre = None
+    if year == "None":
+        year = None
+    else:
+        year = int(year)
+    if country == "None":
+        country = None
+    try:
+        movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
+    except:
+        movies = ["Ничего не получилось найти 😶"]
+    choice_update(user_name, "None", "genre")
+    choice_update(user_name, "None", "year")
+    choice_update(user_name, "None", "country")
+    await message.answer("\n".join(movies), reply_markup=ReplyKeyboardRemove())
+
+@dp.message(F.text == 'Выбрать жанр')
 async def respond_for_genre(message: Message):
     user_name = str(message.from_user.username)
-    genre_update(user_name, "Waiting")
-    await message.answer("Какой жанр?") 
+    choice_update(user_name, "Waiting", "genre")
+    await message.answer(text="Какой жанр?", reply_markup=ReplyKeyboardRemove()) 
 
+@dp.message(F.text == 'Выбрать год')
+async def respond_for_genre(message: Message):
+    user_name = str(message.from_user.username)
+    choice_update(user_name, "Waiting", "year")
+    await message.answer(text="Какой год?", reply_markup=ReplyKeyboardRemove()) 
 
+@dp.message(F.text == 'Выбрать страну')
+async def respond_for_genre(message: Message):
+    user_name = str(message.from_user.username)
+    choice_update(user_name, "Waiting", "country")
+    await message.answer(text="Какую страну?", reply_markup=ReplyKeyboardRemove())
 
 
 @dp.message(F.text == "/random")
@@ -244,13 +280,75 @@ async def echo(message: Message):
         user_add(user_name, "None")
         bot_logger.info("Sent an add request to the database")
 
-    genre = get_genre(user_name)
+    genre, year, country = get_others(user_name)
     if genre == "Waiting":
         bot_logger.info("Catched genre collection")
-        user_chose = message.text
-        movies = get_films_by_filters(filter_genre=user_chose)
-        genre_update(user_name, "None")
-        await message.answer(str(movies))
+        genre = message.text
+        choice_update(user_name, genre, "genre")
+
+        if year != "None" and country != "None":
+            try:
+                movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
+            except:
+                movies = ["Ничего не получилось найти 😶"]
+            choice_update(user_name, "None", "genre")
+            choice_update(user_name, "None", "year")
+            choice_update(user_name, "None", "country")
+            await message.answer("\n".join(movies), reply_markup=ReplyKeyboardRemove())
+            return 
+        col_kb = ReplyKeyboardBuilder()
+        col_kb.add(types.KeyboardButton(text = "Я закончил выбор"))
+        if year == "None":
+            col_kb.add(types.KeyboardButton(text = "Выбрать год"))
+        if country == "None":
+            col_kb.add(types.KeyboardButton(text = "Выбрать страну"))
+        await message.answer(text="Что-то ещё", reply_markup=col_kb.as_markup())
+        return
+    if year == "Waiting":
+        bot_logger.info("Catched year collection")
+        year = message.text
+        choice_update(user_name, year, "year")
+
+        if genre != "None" and country != "None":
+            try:
+                movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
+            except:
+                movies = ["Ничего не получилось найти 😶"]
+            choice_update(user_name, "None", "genre")
+            choice_update(user_name, "None", "year")
+            choice_update(user_name, "None", "country")
+            await message.answer("\n".join(movies), reply_markup=ReplyKeyboardRemove())
+            return 
+        col_kb = ReplyKeyboardBuilder()
+        col_kb.add(types.KeyboardButton(text = "Я закончил выбор"))
+        if genre == "None":
+            col_kb.add(types.KeyboardButton(text = "Выбрать жанр"))
+        if country == "None":
+            col_kb.add(types.KeyboardButton(text = "Выбрать страну"))
+        await message.answer(text="Что-то ещё", reply_markup=col_kb.as_markup())
+        return
+    if country == "Waiting":
+        bot_logger.info("Catched country collection")
+        country = message.text
+        choice_update(user_name, country, "country")
+
+        if genre != "None" and year != "None":
+            try:
+                movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
+            except:
+                movies = ["Ничего не получилось найти 😶"]
+            choice_update(user_name, "None", "genre")
+            choice_update(user_name, "None", "year")
+            choice_update(user_name, "None", "country")
+            await message.answer("\n".join(movies), reply_markup=ReplyKeyboardRemove())
+            return 
+        col_kb = ReplyKeyboardBuilder()
+        col_kb.add(types.KeyboardButton(text = "Я закончил выбор"))
+        if genre == "None":
+            col_kb.add(types.KeyboardButton(text = "Выбрать жанр"))
+        if year == "None":
+            col_kb.add(types.KeyboardButton(text = "Выбрать год"))
+        await message.answer(text="Что-то ещё", reply_markup=col_kb.as_markup())
         return
 
     if message.text.startswith('/random'):

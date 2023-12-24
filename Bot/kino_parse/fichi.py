@@ -2,8 +2,8 @@ from kinopoisk_unofficial.request.films.search_by_keyword_request import SearchB
 from kinopoisk_unofficial.request.films.film_request import FilmRequest
 from kinopoisk_unofficial.kinopoisk_api_client import KinopoiskApiClient
 
-from Bot.victoria_secret import KINOPOISK_API
-from Bot.logger import kino_logger
+from victoria_secret import KINOPOISK_API
+from logger import kino_logger
 
 
 

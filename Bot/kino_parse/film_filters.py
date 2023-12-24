@@ -5,8 +5,8 @@ from kinopoisk_unofficial.model.filter_order import FilterOrder
 from kinopoisk_unofficial.model.filter_genre import FilterGenre
 from kinopoisk_unofficial.request.films.film_search_by_filters_request import FilmSearchByFiltersRequest
 
-from Bot.logger import kino_logger
-from Bot.victoria_secret import KINOPOISK_API
+from logger import kino_logger
+from victoria_secret import KINOPOISK_API
 
 
 

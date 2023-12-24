@@ -74,3 +74,17 @@ film_kb = ReplyKeyboardMarkup(
     input_field_placeholder='Выберите действие из меню', 
     selective=True # чтобы норм в чатах работало, хз насколько нам это надо 
 )
+
+g_y_c = ReplyKeyboardMarkup(
+    keyboard= [
+        [
+            KeyboardButton(text='Выбрать жанр'), 
+            KeyboardButton(text='Выбрать год'),
+            KeyboardButton(text= 'Выбрать страну')
+        ]
+    ], 
+    resize_keyboard=True, # сделать кнопки маленькими
+    one_time_keyboard=True, # скрывается после первого использования
+    input_field_placeholder='Выберите действие из меню', 
+    selective=True # чтобы норм в чатах работало, хз насколько нам это надо 
+)

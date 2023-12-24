@@ -11,8 +11,8 @@ import re
 from urllib.request import urlopen
 import json
 from urllib.parse import quote
-from Bot.victoria_secret import KINOPOISK_API
-from Bot.logger import kino_logger
+from victoria_secret import KINOPOISK_API
+from logger import kino_logger
 
 
 
