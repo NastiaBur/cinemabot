@@ -23,8 +23,11 @@ collections = {
     'oscar' : '1',
     'animals' : '12478',
     'women' : '11803',
-    'middle_age' : '10794'
+    'middle_age' : '10794',
+    'passion' : '13556'
+    
 }
+
 
 def get_collections(collect):
     id = collections[collect]

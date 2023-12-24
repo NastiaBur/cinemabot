@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 *.db
 Bot/victoria_secret.py
+*.json
+*.log

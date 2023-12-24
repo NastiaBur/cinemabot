@@ -10,6 +10,7 @@ from aiogram.types import (
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+
 class Pagination(CallbackData, prefix = "pag"):
     action: str
     page: int
@@ -45,20 +46,15 @@ class CollFilter(Filter):
         self.animals = "/animals" # Лучшее кино про животных
         self.women = "/women" # Истории великих женщин
         self.middle_age = "/middle_age" # Фильмы про средневековье
+        self.passion = "/passion" 
     
     async def __call__(self, message: Message) -> bool:
         req = message.text
         return (req == self.anti_stress) or (req == self.soviet) \
                 or (req == self.holiday) or (req == self.puzzle) \
                 or (req == self.oscar) or (req == self.animals)  \
-                or (req == self.women) or (req == self.middle_age)
+                or (req == self.women) or (req == self.middle_age) or (req == self.passion)
 
-async def __call__(self, message: Message) -> bool:
-    req = message.text
-    return (req == self.anti_stress) or (req == self.soviet) \
-            or (req == self.holiday) or (req == self.puzzle) \
-            or (req == self.oscar) or (req == self.animals)  \
-            or (req == self.woman) or (req == self.middle_age)
 
     
     

@@ -1,20 +1,21 @@
 import sqlite3
+from logger import db_logger
 # Last Christmas I gave you my heart ...
 # but the very next day you give it away
 def user_exists(name):
-    conn = sqlite3.connect("db.db")
-    cur = conn.cursor()
+    connector = sqlite3.connect("db.db")
+    cur = connector.cursor()
 
     cur.execute(''' CREATE TABLE IF NOT EXISTS users
                 (user_name TEXT, movie_name TEXT)''')
-    conn.commit()
+    connector.commit()
 
     sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))
     count = 0
     for _ in sm:
         count += 1
     cur.close()
-    conn.close()
+    connector.close()
 
     if count > 0:
         return True
@@ -22,37 +23,40 @@ def user_exists(name):
 
 
 def user_add(name, movie):
-    conn = sqlite3.connect("db.db")
-    cur = conn.cursor()
+    connector = sqlite3.connect("db.db")
+    cur = connector.cursor()
 
     cur.execute(''' 
                 INSERT INTO users (user_name, movie_name) VALUES (?, ?)
                 ''', (name, movie))
-    conn.commit()
-
+    connector.commit()
+    db_logger.debug(f"User {name} was added to the database with movie {movie}")
     cur.close()
-    conn.close()
+    connector.close()
 
 def user_update(name, movie):
-    conn = sqlite3.connect("db.db")
-    cur = conn.cursor()
+    connector = sqlite3.connect("db.db")
+    cur = connector.cursor()
 
     cur.execute('''UPDATE users SET movie_name = ? WHERE user_name = ?''', (movie, name))
-    conn.commit()
-
+    connector.commit()
+    db_logger.debug(f"In user {name} setted new film {movie}")
     cur.close()
-    conn.close()
+    connector.close()
 
 def get_movie(name):
-    conn = sqlite3.connect("db.db")
-    cur = conn.cursor()
-
-    sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))
-    film = ""
-    for row in sm:
-        film = row[1]
-        break
+    connector = sqlite3.connect("db.db")
+    cur = connector.cursor()
+    try:
+        sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))
+        film = ""
+        for row in sm:
+            film = row[1]
+            break
+    except sqlite3.OperationalError:
+        db_logger.error("There is no such user in database")
+        film = None
 
     cur.close()
-    conn.close()
+    connector.close()
     return film
