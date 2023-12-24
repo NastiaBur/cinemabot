@@ -11,19 +11,17 @@ import json
 
 from kino_parse.kino import Film
 from kino_parse.kino import create_str_list
+from kino_parse.collections import get_collections
 from kino_parse.database_fun import *
 from victoria_secret import TOKEN
 
-from bot_items import AddFillter, film_kb, Pagination, paginator
+from bot_items import AddFillter, CollFilter, film_kb, Pagination, paginator
 from bot_commands import set_commands
 
 
 bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher()
 
-json_file = 'Bot/movies.json'
-with open(json_file, encoding='utf-8') as json_data:
-        data = json.load(json_data)
 
  # Функционал /start
 @dp.message(CommandStart())
@@ -59,18 +57,30 @@ async def additional_info(message: Message):
 # Подборка новогодних фильмов через пагинацию
 @dp.callback_query(Pagination.filter(F.action.in_(["prev", "next"])))
 async def pagination_handler(call: CallbackQuery, callback_data: Pagination):
+    coll_name = callback_data.name
+    if coll_name == "top":
+        file_name= "Bot/movies.json"
+    else:
+        file_name = "Bot/collections.json"
+    
+    with open(file_name, encoding='utf-8') as json_data:
+        data = json.load(json_data)
+    
     page_num = int(callback_data.page)
-    page = (page_num + len(data['top']) - 1) % len(data['top'])
+    page = (page_num + len(data[coll_name]) - 1) % len(data[coll_name])
 
     if callback_data.action == "next":
-        page = (page_num + 1) % len(data['top'])
+        page = (page_num + 1) % len(data[coll_name])
 
-    file = types.InputMediaPhoto(media=data['top'][page]['img'], caption=data['top'][page]['name'])
-    await call.message.edit_media(media = file, reply_markup=paginator(page))
+    file = types.InputMediaPhoto(media=data[coll_name][page]['img'], caption=data[coll_name][page]['name'])
+    await call.message.edit_media(media = file, reply_markup=paginator(page, coll_name))
 
 
 @dp.message(F.text == "/omg")
 async def top(message: Message):
+    json_file = 'Bot/movies.json'
+    with open(json_file, encoding='utf-8') as json_data:
+            data = json.load(json_data)
     file = data['top'][0]['img']
 
     await message.answer("Happy New Year, honey :)", reply_markup=ReplyKeyboardRemove())
@@ -78,7 +88,7 @@ async def top(message: Message):
     await bot.send_photo(
         message.chat.id,
         photo=file,
-        reply_markup=paginator(),
+        reply_markup=paginator(0,'top'),
         caption=data['top'][0]['name'],
     )
 
@@ -134,6 +144,58 @@ async def random_from_top(message: Message):
     await message.answer("Вот случайный фильм:", reply_markup=ReplyKeyboardRemove())
     object.__setattr__(message, "text", random_film_name)
     await echo(message)
+# Обработка запроса подборки
+    
+@dp.message(CollFilter())
+async def get_collection(message: Message):
+    request = message.text
+    get_collections(request[1:])
+    collections = 'Bot/collections.json'
+    with open(collections, encoding='utf-8') as json_data:
+        coll_data = json.load(json_data)
+
+    if request == "/anti_stress":
+        coll = "anti_stress"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']       
+    elif request == "/soviet":
+        coll = "soviet"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']     
+    elif request == "/holiday":
+        coll = "holiday"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']
+    elif request == "/puzzle":
+        coll = "puzzle"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']
+    elif request == "/oscar":
+        coll = "oscar"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']
+    elif request == "/animals":
+        coll = "animals"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']
+    elif request == "/women":
+        coll = "women"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']
+    else:
+        coll = "middle_age"
+        name = coll_data[coll][0]['name']
+        img = coll_data[coll][0]['img']
+
+
+    await message.answer("Ваша подборка: ")
+    await bot.send_photo(
+    message.chat.id,
+    photo=img,
+    reply_markup=paginator(0, coll),
+    caption=coll_data[coll][0]['name'],
+)
+
         
 # Функционал при вводе названия фильма
 @dp.message()
