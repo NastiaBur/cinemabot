@@ -48,6 +48,3 @@ def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None)
             films.append(f.name_ru)
 
     return films
-
-
-print(get_films_by_filters(2015, filter_genre='драма'))

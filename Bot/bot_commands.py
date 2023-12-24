@@ -14,6 +14,10 @@ async def set_commands(bot: Bot):
         BotCommand(
             command='collections',
             description='Посмотреть подборки'
+        ),
+        BotCommand(
+            command = 'choose',
+            description='Подборка с выбором жанра, года и страны'
         )
     ]
 
