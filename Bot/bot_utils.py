@@ -8,7 +8,7 @@ import random
 
 import json 
 
-from kino_parse.kino import Film
+from kino_parse.kino import Film, get_films_by_filters
 from kino_parse.collections import get_collections
 from kino_parse.database_fun import *
 from kino_parse.fichi import create_str_list
@@ -19,7 +19,7 @@ from bot_commands import set_commands
 from logger import bot_logger
 
 
-bot = Bot(TOKEN, parse_mode='HTML')
+bot = Bot("6987883476:AAEDMR0zI1MfeuiURulhNpFmD7Lq0ligW2Y", parse_mode='HTML')
 dp = Dispatcher()
 
 
@@ -166,6 +166,12 @@ async def top(message: Message):
     bot_logger.info("Received a special message and sent a secret response")
     await message.answer("Вы у меня самые лучшие!")
 
+@dp.message(F.text == "/choose_genre")
+async def respond_for_genre(message: Message):
+    user_name = str(message.from_user.username)
+    genre_update(user_name, "Waiting")
+    await message.answer("Какой жанр?") 
+
 
 
 
@@ -232,23 +238,33 @@ async def get_collection(message: Message):
 # Функционал при вводе названия фильма
 @dp.message()
 async def echo(message: Message):
+    user_name = str(message.from_user.username)
     command_random = False
+    if user_exists(user_name) == False:
+        user_add(user_name, "None")
+        bot_logger.info("Sent an add request to the database")
+
+    genre = get_genre(user_name)
+    if genre == "Waiting":
+        bot_logger.info("Catched genre collection")
+        user_chose = message.text
+        movies = get_films_by_filters(filter_genre=user_chose)
+        genre_update(user_name, "None")
+        await message.answer(str(movies))
+        return
+
     if message.text.startswith('/random'):
         modified_message = message.text.replace('/random', '')
         command_random = True
         bot_logger.debug("Catched a /random message")
     else:
         modified_message = message.text
+    
     film = Film(modified_message)
-    user_name = str(message.from_user.username)
     film_name = film.get_name()
     if film_name is not None:
-        if user_exists(user_name):
-            user_update(user_name, film_name)
-            bot_logger.info("Sent an update request to the database")
-        else:
-            user_add(user_name, film_name)
-            bot_logger.info("Sent an add request to the database")
+        user_update(user_name, film_name)
+        bot_logger.info("Sent an update request to the database")
             
     if film_name is None:
         await message.answer("Не найдено :(")

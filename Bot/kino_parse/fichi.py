@@ -56,8 +56,6 @@ def create_str_list(name):
     i = 1
     while i < 6 and len(other_films_by_request) > i:
         name_year = other_films_by_request[i]
-        print(name_year)
-        print(other_films_by_request)
         res += name_year[0] + ', ' + str(name_year[1]) + '\n'
         i += 1
     return res

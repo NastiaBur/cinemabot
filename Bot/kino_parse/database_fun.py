@@ -7,7 +7,7 @@ def user_exists(name):
     cur = connector.cursor()
 
     cur.execute(''' CREATE TABLE IF NOT EXISTS users
-                (user_name TEXT, movie_name TEXT)''')
+                (user_name TEXT, movie_name TEXT, genre TEXT)''')
     connector.commit()
 
     sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))
@@ -27,8 +27,8 @@ def user_add(name, movie):
     cur = connector.cursor()
 
     cur.execute(''' 
-                INSERT INTO users (user_name, movie_name) VALUES (?, ?)
-                ''', (name, movie))
+                INSERT INTO users (user_name, movie_name, genre) VALUES (?, ?, ?)
+                ''', (name, movie, "None"))
     connector.commit()
     db_logger.debug(f"User {name} was added to the database with movie {movie}")
     cur.close()
@@ -41,6 +41,16 @@ def user_update(name, movie):
     cur.execute('''UPDATE users SET movie_name = ? WHERE user_name = ?''', (movie, name))
     connector.commit()
     db_logger.debug(f"In user {name} setted new film {movie}")
+    cur.close()
+    connector.close()
+
+def genre_update(name, genre):
+    connector = sqlite3.connect("db.db")
+    cur = connector.cursor()
+
+    cur.execute('''UPDATE users SET genre = ? WHERE user_name = ?''', (genre, name))
+    connector.commit()
+    db_logger.debug(f"In user {name} setted new genre {genre}")
     cur.close()
     connector.close()
 
@@ -60,3 +70,20 @@ def get_movie(name):
     cur.close()
     connector.close()
     return film
+
+def get_genre(name):
+    connector = sqlite3.connect("db.db")
+    cur = connector.cursor()
+    try:
+        sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))
+        genre = ""
+        for row in sm:
+            genre = row[2]
+            break
+    except sqlite3.OperationalError:
+        db_logger.error("There is no such user in database")
+        genre = None
+
+    cur.close()
+    connector.close()
+    return genre
