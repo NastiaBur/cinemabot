@@ -242,7 +242,7 @@ def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None)
     return films
 
 
-def get_10_films_by_name(name):
+def get_5_films_by_name(name):
     api_client = KinopoiskApiClient(KINOPOISK_API)
     request = SearchByKeywordRequest(name)
     response = api_client.films.send_search_by_keyword_request(request)
@@ -260,9 +260,12 @@ def get_10_films_by_name(name):
 
 
 def create_str_list(name):
-    other_films_by_request = get_10_films_by_name(name)
+    other_films_by_request = get_5_films_by_name(name)
     res = ''
-    for i in range(1, 6):
+    i = 1
+    while i < 6 and len(other_films_by_request) > i:
         name_year = other_films_by_request[i]
         res += name_year[0] + ', ' + str(name_year[1]) + '\n'
+        i += 1
     return res
+

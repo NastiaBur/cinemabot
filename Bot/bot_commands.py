@@ -18,6 +18,10 @@ async def set_commands(bot: Bot):
         BotCommand(
             command='random',
             description='Посоветовать фильм'
+        ), 
+        BotCommand(
+            command='collections',
+            description='Посмотреть подборки'
         )
     ]
 

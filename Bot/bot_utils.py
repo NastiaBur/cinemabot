@@ -92,6 +92,18 @@ async def top(message: Message):
         caption=data['top'][0]['name'],
     )
 
+@dp.message(F.text == '/collections')
+async def get_names(message: Message):
+    await message.answer("У меня есть такие подборки, выбери команду и напиши её мне: \n \
+/anti_stress - Подборка доброго расслабляющего кино \n \
+/soviet - Подборка советского кино \n \
+/holiday - Подборка новогодних фильмов \n \
+/puzzle - Подборка фильмов головоломок \n \
+/oscar - Подборка фильмов с премией оскар \n \
+/animals - Подборка фильмов про животных \n \
+/women - Подборка фильмов о сильных женщинах \n \
+/middle_age - Подборка фильмов о средневековье")
+
 
 # Подборка фильмов сразу одним сообщением
 @dp.message(F.text == "/last")
