@@ -1,19 +1,7 @@
-# "https://api.ivi.ru/mobileapi/collection/catalog/v7/?id=14500&app_version=23801"
-# posters - url
-# title
-# 14497 - новый год
-# 11803 - истории великих женщин
-# 11604 - советское
-# 12076 - кино-антистресс
-# 1- премия оскар
-# 13556 - Все оттенки страсти
-# 10938 - Фильмы-головоломки
-# 12478 - Лучшее кино про животных
-# 12218 - Культовое кино
-# 10794 - Фильмы про средневековье
-
 from urllib.request import urlopen
 import json
+
+
 
 collections = {
     'anti_stress' : '12076',

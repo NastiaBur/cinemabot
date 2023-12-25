@@ -20,6 +20,7 @@ from bot_commands import set_commands
 from logger.logger import bot_logger
 
 
+
 bot = Bot(TOKEN, parse_mode='HTML')
 dp = Dispatcher()
 

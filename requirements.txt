@@ -19,3 +19,6 @@ requests==2.26.0
 requests-file==1.5.1
 jsonschema==4.17.0
 selenium==4.16.0
+youtube_search==2.1.2
+logging==0.4.9.6
+pytest==7.4.2
