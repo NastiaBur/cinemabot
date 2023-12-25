@@ -11,7 +11,7 @@ import re
 from urllib.request import urlopen
 import json
 from urllib.parse import quote
-from victoria_secret import KINOPOISK_API
+from victoria_secret import KINOPOISK_API, X_API_KEY
 from logger.logger import kino_logger
 
 
@@ -267,7 +267,7 @@ class Film:
         # Okko, Wink
         url = 'https://kinopoiskapiunofficial.tech/api/v2.2/films/' + str(
             self.request_film_id) + '/external_sources?page=1'
-        payload = {'Content-Type': 'application/json', 'X-API-KEY': '4ab268be-1ff8-4bcd-bda8-85d7afb10819'}
+        payload = {'Content-Type': 'application/json', 'X-API-KEY': X_API_KEY}
         r = requests.get(url, headers=payload)
         status = r.status_code
         if status != 200:
