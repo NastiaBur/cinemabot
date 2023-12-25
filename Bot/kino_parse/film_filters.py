@@ -5,7 +5,7 @@ from kinopoisk_unofficial.model.filter_order import FilterOrder
 from kinopoisk_unofficial.model.filter_genre import FilterGenre
 from kinopoisk_unofficial.request.films.film_search_by_filters_request import FilmSearchByFiltersRequest
 
-from logger import kino_logger
+from Bot.logger.logger import kino_logger
 from victoria_secret import KINOPOISK_API
 
 
@@ -36,7 +36,7 @@ def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None)
         filters_request.year_from = year_from
 
     request.order = FilterOrder.RATING
-    try:
+    try: 
         response = api_client.films.send_film_search_by_filters_request(filters_request)
     except Exception as e:
         kino_logger.error(f'{e} in send_film_search_by_filters_request')

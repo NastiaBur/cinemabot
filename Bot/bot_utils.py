@@ -15,9 +15,9 @@ from kino_parse.database_fun import *
 from kino_parse.fichi import Related_films
 from victoria_secret import TOKEN
 
-from bot_items import AddFillter, CollFilter, film_kb, g_y_c, Pagination, paginator
+from bot_items import AddFilter, CollFilter, ChoiceFilter, film_kb, g_y_c, Pagination, paginator
 from bot_commands import set_commands
-from logger import bot_logger
+from Bot.logger.logger import bot_logger
 
 
 bot = Bot(TOKEN, parse_mode='HTML')
@@ -35,17 +35,15 @@ async def start(message: Message):
 
     Описание:
     Функция вызывается при получении команды /start. Возвращает приветственное сообщение и просит пользователя ввести название фильма.
-
-    Пример использования:
-    >> start(message)
     '''
-    bot_logger.info(f'User {message.from_user.id} started the bot and updated collections')
+    bot_logger.info(f'User {message.from_user.username} started the bot and updated collections')
+    user_exists(str(message.from_user.username))
     user_add(str(message.from_user.username), "None")
     await set_commands(bot)
     await message.answer(f"Привет, <b>{message.from_user.first_name}</b>! \nНапиши мне название фильма, который надо найти.")
 
 # Обработка сообщений с дополнительной информацией 
-@dp.message(AddFillter())
+@dp.message(AddFilter())
 async def additional_info(message: Message):
     ''''
     Функция, обрабатывающая дополнительную информацию о фильме.
@@ -160,7 +158,7 @@ async def get_names(message: Message):
     await message.answer("У меня есть такие подборки, выбери команду и напиши её мне: \n /anti_stress - Подборка доброго расслабляющего кино \n \
 /soviet - Подборка советского кино \n /holiday - Подборка новогодних фильмов \n /puzzle - Подборка фильмов головоломок \n /oscar - Подборка фильмов с премией оскар \n \
 /animals - Подборка фильмов про животных \n /women - Подборка фильмов о сильных женщинах \n /middle_age - Подборка фильмов о средневековье \n \
-/passion - Подборка фильмов с изюминкой, \n /omg - Наша специальная подборка") 
+/passion - Подборка фильмов с изюминкой \n /omg - Наша специальная подборка") 
 
 
 @dp.message(F.text == "😡")
@@ -170,10 +168,29 @@ async def top(message: Message):
 
 @dp.message(F.text == '/choose')
 async def choose_category(message: Message):
-    await message.answer(text = "Выбери категорию для сотсавления подборки", reply_markup=g_y_c)
+    '''
+    Функция-обработчик для команды /choose.
+
+    Параметры:
+    message: Объект типа Message, содержащий информацию о сообщении от пользователя.
+
+    Описание:
+    Предлалагет категорию для составления собственной коллекции, вызывает клавиаутуру в которой можно выбрать год, жанр или страну
+    '''
+    await message.answer(text = "Выбери категорию для составления подборки", reply_markup=g_y_c)
 
 @dp.message(F.text == "Я закончил выбор")
 async def choice_ended(message:Message):
+    '''
+    Функция-обработчик для сообщения "Я закончил выбор".
+
+    Параметры:
+    message: Объект типа Message, содержащий информацию о сообщении от пользователя.
+
+    Описание:
+    Получает фильтры, указанные пользователем, через базу данных, находит фильмы по этим фильтрам и отправляет результат.
+    """
+    '''
     user_name = str(message.from_user.username)
     genre, year, country = get_others(user_name)
     if genre == "None":
@@ -188,28 +205,36 @@ async def choice_ended(message:Message):
         movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
     except:
         movies = ["Ничего не получилось найти 😶"]
+
     choice_update(user_name, "None", "genre")
     choice_update(user_name, "None", "year")
     choice_update(user_name, "None", "country")
     await message.answer("\n".join(movies), reply_markup=ReplyKeyboardRemove())
 
-@dp.message(F.text == 'Выбрать жанр')
+@dp.message(ChoiceFilter())
 async def respond_for_genre(message: Message):
-    user_name = str(message.from_user.username)
-    choice_update(user_name, "Waiting", "genre")
-    await message.answer(text="Какой жанр?", reply_markup=ReplyKeyboardRemove()) 
+    '''
+    Функция, обрабатывающая настройка выбора пользователя.
+    Обрабатывает сообщение пользователя, получает выбранный фильтр (жанр, год, страна) и обновляет соответствующий выбор пользователя.
 
-@dp.message(F.text == 'Выбрать год')
-async def respond_for_genre(message: Message):
-    user_name = str(message.from_user.username)
-    choice_update(user_name, "Waiting", "year")
-    await message.answer(text="Какой год?", reply_markup=ReplyKeyboardRemove()) 
+    Параметры:
+    message: Объект типа Message, содержащий информацию о сообщении от пользователя.
 
-@dp.message(F.text == 'Выбрать страну')
-async def respond_for_genre(message: Message):
+    Описание:
+    Обрабатывает сообщение пользователя, получает выбранный фильтр (жанр, год, страна) и обновляет соответствующий выбор пользователя в базе данных.
+    '''
+    request = message.text
     user_name = str(message.from_user.username)
-    choice_update(user_name, "Waiting", "country")
-    await message.answer(text="Какую страну?", reply_markup=ReplyKeyboardRemove())
+    if (request == "Выбрать жанр"):
+        choice_update(user_name, "Waiting", "genre")
+        ans = "Kaкой жанр?"
+    if (request == "Выбрать год"):
+        choice_update(user_name, "Waiting", "year")
+        ans = "Kaкой год?"
+    if (request == "Выбрать страну"):
+        choice_update(user_name, "Waiting", "country")
+        ans = "Kaкую страну?"
+    await message.answer(text=ans, reply_markup=ReplyKeyboardRemove()) 
 
 
 @dp.message(F.text == "/random")
@@ -370,27 +395,42 @@ async def echo(message: Message):
     else:
         youtube_link = film.youtube_parser()
         urlkb = InlineKeyboardBuilder()
-        
         ivi_rating, ivi_link = film.get_ivi_info()
-        if ivi_link is not None:
-            urlkb.add(types.InlineKeyboardButton(text="ivi", url =str(ivi_link)))
-        
 
-        urlkb.add(types.InlineKeyboardButton(text="kinopoisk", url=str(film.get_kinopoisk_url())))
-        urlkb.add(types.InlineKeyboardButton(text= "youtube", url = str(youtube_link)))
+        urlkb.row(types.InlineKeyboardButton(text="kinopoisk", url=str(film.get_kinopoisk_url())))
+        urlkb.row(types.InlineKeyboardButton(text= "youtube", url = str(youtube_link)))
+        sites = ['youtube', 'kinopoisk']
+
+        if ivi_link is not None:
+            urlkb.row(types.InlineKeyboardButton(text="ivi", url =str(ivi_link)))
+            sites.append('ivi')
 
         zona_link = film.zona_parser()
         if zona_link is not None:
-            urlkb.add(types.InlineKeyboardButton(text="zona", url =str(zona_link)))
+            urlkb.row(types.InlineKeyboardButton(text="zona", url =str(zona_link)))
+            sites.append('zona')
 
         anime_link = film.anime_parser()
         if anime_link is not None:
-            urlkb.add(types.InlineKeyboardButton(text="anime", url =str(anime_link)))
+            urlkb.row(types.InlineKeyboardButton(text="anime", url =str(anime_link)))
+            sitez.append('anime')
+
+        okko_link = film.get_external_sources("Okko")
+        if okko_link is not None:
+            urlkb.row(types.InlineKeyboardButton(text="okko", url =str(okko_link)))
+            sites.append('okko')
+        
+        wink_link = film.get_external_sources("Wink")
+        if wink_link is not None:
+            urlkb.row(types.InlineKeyboardButton(text="wink", url =str(wink_link)))
+            sites.append('wink')
         
         ans = '<b>Название:</b> {} \n<b>Год создания:</b> {} \n<b>Рейтинг:</b> kinopoisk {} \ ivi  {}\n<b>Страна:</b> {} \n<b>Возраст:</b> {}'.format(film_name, 
             film.get_year(), film.get_rating(), ivi_rating, ', '.join(film.get_country()), film.get_age())
 
         await bot.send_photo(chat_id=message.chat.id, photo=film.get_poster_url(), caption=ans, reply_markup=urlkb.as_markup())
+        bot_logger.debug(f"Created an answer to the film {film.name}, with urls {sites}")
+
         if not command_random:
             other_films_by_request = Related_films(message.text).get_films()
             question = 'Возможно, вы искали какой-то из этих фильмов?\n\n' + other_films_by_request

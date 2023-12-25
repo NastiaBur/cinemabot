@@ -12,7 +12,7 @@ from urllib.request import urlopen
 import json
 from urllib.parse import quote
 from victoria_secret import KINOPOISK_API
-from logger import kino_logger
+from Bot.logger.logger import kino_logger
 
 
 

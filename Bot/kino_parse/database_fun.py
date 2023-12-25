@@ -1,5 +1,5 @@
 import sqlite3
-from logger import db_logger
+from Bot.logger.logger import db_logger
 # Last Christmas I gave you my heart ...
 # but the very next day you give it away
 def user_exists(name):

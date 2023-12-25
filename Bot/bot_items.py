@@ -26,7 +26,7 @@ def paginator(page: int=0, name: str=""):
     )
     return builder.as_markup()
 
-class AddFillter(Filter):
+class AddFilter(Filter):
     def __init__(self):
         self.descr = "Описание"
         self.direct = "Режиссеры"
@@ -54,10 +54,17 @@ class CollFilter(Filter):
                 or (req == self.holiday) or (req == self.puzzle) \
                 or (req == self.oscar) or (req == self.animals)  \
                 or (req == self.women) or (req == self.middle_age) or (req == self.passion)
-
-
     
+class ChoiceFilter(Filter):
+    def __init__(self):
+            self.genre = "Выбрать жанр"
+            self.country = "Выбрать год"
+            self.year = "Выбрать страну"
     
+    async def __call__(self, message: Message) -> bool:
+        req = message.text
+        return (req == self.genre) or (req == self.country) or (req == self.year)
+
 film_kb = ReplyKeyboardMarkup(
     keyboard= [
         [
