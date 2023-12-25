@@ -82,7 +82,7 @@ film_kb = ReplyKeyboardMarkup(
     selective=True # чтобы норм в чатах работало, хз насколько нам это надо 
 )
 
-g_y_c = ReplyKeyboardMarkup(
+choice_kb = ReplyKeyboardMarkup(
     keyboard= [
         [
             KeyboardButton(text='Выбрать жанр'), 

@@ -1,9 +1,9 @@
 import sqlite3
-from Bot.logger.logger import db_logger
+from logger.logger import db_logger
 # Last Christmas I gave you my heart ...
 # but the very next day you give it away
 def user_exists(name):
-    connector = sqlite3.connect("sm.db")
+    connector = sqlite3.connect("user_data.db")
     cur = connector.cursor()
 
     cur.execute(''' CREATE TABLE IF NOT EXISTS users
@@ -23,7 +23,7 @@ def user_exists(name):
 
 
 def user_add(name, movie):
-    connector = sqlite3.connect("sm.db")
+    connector = sqlite3.connect("user_data.db")
     cur = connector.cursor()
 
     cur.execute(''' 
@@ -35,7 +35,7 @@ def user_add(name, movie):
     connector.close()
 
 def user_update(name, item):
-    connector = sqlite3.connect("sm.db")
+    connector = sqlite3.connect("user_data.db")
     cur = connector.cursor()
 
     cur.execute('''UPDATE users SET movie_name = ? WHERE user_name = ?''', (item, name))
@@ -47,7 +47,7 @@ def user_update(name, item):
 
 def choice_update(name, item, type):
 
-    connector = sqlite3.connect("sm.db")
+    connector = sqlite3.connect("user_data.db")
     cur = connector.cursor()
 
     if type == "genre":
@@ -68,7 +68,7 @@ def choice_update(name, item, type):
 
 
 def get_movie(name):
-    connector = sqlite3.connect("sm.db")
+    connector = sqlite3.connect("user_data.db")
     cur = connector.cursor()
     try:
         sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))
@@ -85,7 +85,7 @@ def get_movie(name):
     return film
 
 def get_others(name):
-    connector = sqlite3.connect("sm.db")
+    connector = sqlite3.connect("user_data.db")
     cur = connector.cursor()
     try:
         sm = cur.execute("SELECT * FROM users WHERE user_name=?", (name, ))

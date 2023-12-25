@@ -15,9 +15,9 @@ from kino_parse.database_fun import *
 from kino_parse.fichi import Related_films
 from victoria_secret import TOKEN
 
-from bot_items import AddFilter, CollFilter, ChoiceFilter, film_kb, g_y_c, Pagination, paginator
+from bot_items import AddFilter, CollFilter, ChoiceFilter, film_kb, choice_kb, Pagination, paginator
 from bot_commands import set_commands
-from Bot.logger.logger import bot_logger
+from logger.logger import bot_logger
 
 
 bot = Bot(TOKEN, parse_mode='HTML')
@@ -177,7 +177,7 @@ async def choose_category(message: Message):
     Описание:
     Предлалагет категорию для составления собственной коллекции, вызывает клавиаутуру в которой можно выбрать год, жанр или страну
     '''
-    await message.answer(text = "Выбери категорию для составления подборки", reply_markup=g_y_c)
+    await message.answer(text = "Выбери категорию для составления подборки", reply_markup=choice_kb)
 
 @dp.message(F.text == "Я закончил выбор")
 async def choice_ended(message:Message):
@@ -413,7 +413,7 @@ async def echo(message: Message):
         anime_link = film.anime_parser()
         if anime_link is not None:
             urlkb.row(types.InlineKeyboardButton(text="anime", url =str(anime_link)))
-            sitez.append('anime')
+            sites.append('anime')
 
         okko_link = film.get_external_sources("Okko")
         if okko_link is not None:
