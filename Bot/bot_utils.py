@@ -202,10 +202,14 @@ async def choice_ended(message:Message):
         year = int(year)
     if country == "None":
         country = None
-    try:
-        movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
-    except:
-        movies = ["Ничего не получилось найти 😶"]
+    print(country, year, genre)
+    movies = get_films_by_filters(year_from= year, filter_country= country, filter_genre=genre)
+    # try:
+    #     movies = get_films_by_filters(year_from= year, filter_country= country, filter_genre=genre)
+    # except:
+    #     movies = ["Ничего не получилось найти 😶"]
+    if len(movies) == 0:
+            movies = ["Ничего не получилось найти 😶"]
 
     choice_update(user_name, "None", "genre")
     choice_update(user_name, "None", "year")
@@ -318,6 +322,8 @@ async def echo(message: Message):
                 movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
             except:
                 movies = ["Ничего не получилось найти 😶"]
+            if len(movies) == 0:
+                movies = ["Ничего не получилось найти 😶"]
             choice_update(user_name, "None", "genre")
             choice_update(user_name, "None", "year")
             choice_update(user_name, "None", "country")
@@ -341,6 +347,8 @@ async def echo(message: Message):
                 movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
             except:
                 movies = ["Ничего не получилось найти 😶"]
+            if len(movies) == 0:
+                movies = ["Ничего не получилось найти 😶"]
             choice_update(user_name, "None", "genre")
             choice_update(user_name, "None", "year")
             choice_update(user_name, "None", "country")
@@ -363,6 +371,8 @@ async def echo(message: Message):
             try:
                 movies = get_films_by_filters(year_from= int(year), filter_country= country, filter_genre=genre)
             except:
+                movies = ["Ничего не получилось найти 😶"]
+            if len(movies) == 0:
                 movies = ["Ничего не получилось найти 😶"]
             choice_update(user_name, "None", "genre")
             choice_update(user_name, "None", "year")

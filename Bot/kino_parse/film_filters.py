@@ -11,55 +11,41 @@ from victoria_secret import KINOPOISK_API
 
 
 def get_films_by_filters(year_from=None, filter_country=None, filter_genre=None):
-    """
-    Fetches a list of films filtered by provided genre, country, and/or start year.
 
-    This function queries the Kinopoisk API to retrieve a list of films based on the
-    specified filters. It supports filtering by a genre, a country, and/or a start year
-    (the year from which to begin the search -- year_from). The films are ordered by rating.
 
-    If any exception occurs during API interaction, it logs the error and returns an empty list.
-
-    :param year_from: The year to start filtering films from. Defaults to None, which means no filter by year.
-    :param filter_country: The name of the country to filter the films by. Defaults to None.
-    :param filter_genre: The name of the genre to filter the films by. Defaults to None.
-    :return: A list of film names in Russian that match the filters, or an empty list if an error occurs.
-    """
-        
-    try:
-        api_client = KinopoiskApiClient(KINOPOISK_API)
-        request = FiltersRequest()
-        response = api_client.films.send_filters_request(request)
-        filters_request = FilmSearchByFiltersRequest()
-    except Exception as e:
-        kino_logger.error(f'In get_films_by_filters exception {e} in send_filters_request')
-        return []
+    if filter_genre is not None:
+        filter_genre = filter_genre.lower()
+    print(year_from, filter_country, filter_genre)
+    api_client = KinopoiskApiClient(KINOPOISK_API)
+    request = FiltersRequest()
+    response = api_client.films.send_filters_request(request)
+    filters_request = FilmSearchByFiltersRequest()
 
     if filter_genre is not None:
         genres = response.genres
+        genre_id = None
+        print(filter_genre)
         for genre in genres:
             if genre.genre == filter_genre:
-                filters_request.add_genre(FilterGenre(genre.id, filter_genre))
+                print(genre.genre)
+                genre_id = genre.id
+                print(genre_id)
+                filters_request.add_genre(FilterGenre(genre_id, filter_genre))
 
     if filter_country is not None:
         countries = response.countries
+        country_id = None
         for country in countries:
             if country.country == filter_country:
-                filters_request.add_country(FilterCountry(country.id, filter_country))
+                country_id = country.id
+                filters_request.add_country(FilterCountry(country_id, filter_country))
 
     if year_from is not None:
         filters_request.year_from = year_from
-
     request.order = FilterOrder.RATING
-    try: 
-        response = api_client.films.send_film_search_by_filters_request(filters_request)
-    except Exception as e:
-        kino_logger.error(f'{e} in send_film_search_by_filters_request')
-        return []
 
+    response = api_client.films.send_film_search_by_filters_request(filters_request)
     films = []
     for f in response.items:
-        if f.name_ru is not None:
-            films.append(f.name_ru)
-
+        films.append(f.name_ru)
     return films
